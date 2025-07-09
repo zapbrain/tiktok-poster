@@ -88,6 +88,7 @@ def create_math_video():
     text_clip = ImageClip(text_np, duration=clip.duration).set_position("center")
 
     audio = AudioFileClip("sound.mp3").set_duration(clip.duration)
+    clip = clip.resize(height=540)
     final = CompositeVideoClip([clip, text_clip]).set_audio(audio)
 
     filename = f"{OUTPUT_FOLDER}/{datetime.date.today()}_{int(time.time())}_math_video.mp4"
