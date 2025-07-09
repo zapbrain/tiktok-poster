@@ -1,9 +1,10 @@
 import os
-os.environ["IMAGEMAGICK_BINARY"] = r"C:\Program Files\ImageMagick-7.1.1-Q16-HDRI\magick.exe"
 import time
 import random
 import datetime
-from moviepy.editor import VideoFileClip, TextClip, CompositeVideoClip, AudioFileClip
+import numpy as np
+from PIL import Image, ImageDraw, ImageFont
+from moviepy.editor import VideoFileClip, ImageClip, CompositeVideoClip, AudioFileClip
 import cloudinary
 import cloudinary.uploader
 import requests
@@ -22,83 +23,72 @@ def generate_equation_variant():
     variant = random.choice([1, 2, 3, 4, 5, 6, 7, 8])
     
     if variant == 1:
-        # einfache lineare Gleichung: 3x + 5 = 14
         m = random.randint(1, 9)
         x = random.randint(1, 9)
         b = random.randint(1, 9)
         y = m * x + b
         return f"{m}x + {b} = {y}"
-
     elif variant == 2:
-        # Gleichung mit Klammern: 2(x + 3) = 16
         a = random.randint(1, 5)
         x = random.randint(1, 10)
         b = random.randint(1, 10)
         y = a * (x + b)
         return f"{a}(x + {b}) = {y}"
-
     elif variant == 3:
-        # Bruchgleichung mit ganzzahligem Ergebnis: (x + 4) / 3 = 5
         x = random.randint(1, 10)
         b = random.randint(1, 10)
         y = (x + b)
         if y % 3 != 0:
-            y += 3 - (y % 3)  # auf nächste teilbare Zahl aufrunden
+            y += 3 - (y % 3)
         return f"(x + {b}) / 3 = {y // 3}"
-
     elif variant == 4:
-        # Zwei Klammern: (x + 2)(x - 3) = ...
         r1 = random.randint(1, 5)
         r2 = random.randint(1, 5)
         return f"(x + {r1})(x - {r2}) = 0"
-
     elif variant == 5:
-        # Quadratische Gleichung Standardform: x² + 3x + 2 = 0
         a = random.randint(1, 5)
         b = random.randint(1, 10)
         c = random.randint(1, 10)
         return f"{a}x² + {b}x + {c} = 0"
-
     elif variant == 6:
-        # Produktform quadratische Gleichung: (x + 3)(x - 2) = 0
         r1 = random.randint(1, 9)
         r2 = random.randint(1, 9)
         return f"(x + {r1})(x - {r2}) = 0"
-
     elif variant == 7:
-        # Negative lineare Gleichung: -3x + 5 = -10
         m = -random.randint(1, 9)
         x = random.randint(1, 9)
         b = random.randint(-10, 10)
         y = m * x + b
         return f"{m}x + {b} = {y}"
-
     elif variant == 8:
-        # Klammerquadratische Gleichung: (x + 2)² = 49
         s = random.randint(1, 9)
         x = random.randint(1, 10)
         right = (x + s) ** 2
         return f"(x + {s})² = {right}"
 
+def create_text_image(text, width, height):
+    img = Image.new("RGBA", (width, height), (255, 255, 255, 0))
+    draw = ImageDraw.Draw(img)
+    try:
+        font = ImageFont.truetype("Arial.ttf", 120)  
+    except:
+        font = ImageFont.load_default()
+    bbox = draw.textbbox((0, 0), text, font=font)
+    w = bbox[2] - bbox[0]
+    h = bbox[3] - bbox[1]
+    draw.text(((width - w) // 2, (height - h) // 2), text, font=font, fill="black")
+    return np.array(img)
 
 def create_math_video():
     equation = generate_equation_variant()
     video_path = os.path.join("daily_tiktoks", "Vorlage.mp4")
-    clip = VideoFileClip(video_path).subclipped(0, 5)
+    clip = VideoFileClip(video_path).subclip(0, 5)
 
-    txt_clip = TextClip(
-        equation,
-        fontsize=130,
-        color="black",
-        font="Arial-Bold"
-    ).set_position("center").set_duration(clip.duration)
+    text_np = create_text_image(equation, clip.w, 200)
+    text_clip = ImageClip(text_np, duration=clip.duration).set_position("center")
 
-
-
-    final = CompositeVideoClip([clip, txt_clip])
-
-    audio = AudioFileClip("sound.mp3").set_duration(final.duration)
-    final = final.set_audio(audio)
+    audio = AudioFileClip("sound.mp3").set_duration(clip.duration)
+    final = CompositeVideoClip([clip, text_clip]).set_audio(audio)
 
     filename = f"{OUTPUT_FOLDER}/{datetime.date.today()}_{int(time.time())}_math_video.mp4"
     final.write_videofile(
@@ -182,7 +172,6 @@ if __name__ == "__main__":
             print(f"Warte {wait_minutes} Minuten bis zum nächsten Post.")
             time.sleep(wait_minutes * 60)
         else:
-            # außerhalb der Zeiten: bis 10 Uhr schlafen
             next_start = now.replace(hour=10, minute=0, second=0, microsecond=0)
             if now.hour >= 20:
                 next_start += datetime.timedelta(days=1)
