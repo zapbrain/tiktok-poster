@@ -87,7 +87,7 @@ def create_math_video():
     clip = VideoFileClip(video_path).subclipped(0, 5)
 
     txt_clip = TextClip(
-        equation,
+        txt=equation,
         fontsize=130,
         color="black",
         font="Arial-Bold",
