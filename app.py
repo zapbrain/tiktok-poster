@@ -87,13 +87,12 @@ def create_math_video():
     clip = VideoFileClip(video_path).subclipped(0, 5)
 
     txt_clip = TextClip(
-        txt=equation,
+        equation,
         fontsize=130,
         color="black",
-        font="Arial-Bold",
-        method="caption",
-        size=(clip.w, None)
+        font="Arial-Bold"
     ).set_position("center").set_duration(clip.duration)
+
 
     final = CompositeVideoClip([clip, txt_clip])
 
