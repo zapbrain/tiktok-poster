@@ -83,7 +83,7 @@ def generate_equation_variant():
 
 def create_math_video():
     equation = generate_equation_variant()
-    video_path = r"D:\tiktok_math_bot\daily_tiktoks\Vorlage.mp4"
+    video_path = os.path.join("daily_tiktoks", "Vorlage.mp4")
     clip = VideoFileClip(video_path).subclip(0, 5)
 
     txt_clip = TextClip(
