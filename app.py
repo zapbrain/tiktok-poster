@@ -84,7 +84,7 @@ def generate_equation_variant():
 def create_math_video():
     equation = generate_equation_variant()
     video_path = os.path.join("daily_tiktoks", "Vorlage.mp4")
-    clip = VideoFileClip(video_path).subclip(0, 5)
+    clip = VideoFileClip(video_path).subclipped(0, 5)
 
     txt_clip = TextClip(
         equation,
