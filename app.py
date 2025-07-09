@@ -3,7 +3,7 @@ os.environ["IMAGEMAGICK_BINARY"] = r"C:\Program Files\ImageMagick-7.1.1-Q16-HDRI
 import time
 import random
 import datetime
-from moviepy import VideoFileClip, TextClip, CompositeVideoClip, AudioFileClip
+from moviepy.editor import VideoFileClip, TextClip, CompositeVideoClip, AudioFileClip
 import cloudinary
 import cloudinary.uploader
 import requests
@@ -92,6 +92,7 @@ def create_math_video():
         color="black",
         font="Arial-Bold"
     ).set_position("center").set_duration(clip.duration)
+
 
 
     final = CompositeVideoClip([clip, txt_clip])
